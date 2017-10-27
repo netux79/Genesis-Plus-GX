@@ -328,9 +328,13 @@ void osd_input_update(void)
 
       case DEVICE_LIGHTGUN:
       {
+#ifdef GEKKO
+        input.analog[i][0] = (input_state_cb(player, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_X) * bitmap.viewport.w / 640);
+        input.analog[i][1] = (input_state_cb(player, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_Y) * bitmap.viewport.h / 480);
+#else
         input.analog[i][0] = ((input_state_cb(player, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_X) + 0x7fff) * bitmap.viewport.w) / 0xfffe;
         input.analog[i][1] = ((input_state_cb(player, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_Y) + 0x7fff) * bitmap.viewport.h) / 0xfffe;
-
+#endif
         if (input_state_cb(player, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_TRIGGER))
           temp |= INPUT_A;
         if (input_state_cb(player, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_TURBO))
@@ -473,8 +477,13 @@ void osd_input_update(void)
   }
 }
 
+#define CURSOR_SIZE 3
 static void draw_cursor(int16_t x, int16_t y, uint16_t color)
 {
+  
+  /* never draw it outside of the buffer */
+  if (x < CURSOR_SIZE || x > (bitmap.viewport.w-CURSOR_SIZE) || y < CURSOR_SIZE || y > (bitmap.viewport.h-CURSOR_SIZE)) return;
+
   uint16_t *ptr = (uint16_t *)bitmap.data + ((bitmap.viewport.y + y) * bitmap.width) + x + bitmap.viewport.x;
   ptr[-3*bitmap.width] = ptr[-bitmap.width] = ptr[bitmap.width] = ptr[3*bitmap.width] = ptr[-3] = ptr[-1] = ptr[1] = ptr[3] = color;
   ptr[-2*bitmap.width] = ptr[2*bitmap.width] = ptr[-2] = ptr[2] = ptr[0] = 0xffff;

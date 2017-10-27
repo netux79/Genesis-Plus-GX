@@ -2,6 +2,8 @@
 Debug/
 Release/
 
+*.a
+*.o
 psp2/*.o
 psp2/*.elf
 psp2/*.velf
